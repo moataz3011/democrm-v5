@@ -1,0 +1,99 @@
+# values.yaml — demoCRM v4 (self-contained with MongoDB Community Operator)
+# This chart can also optionally install ingress-nginx and cert-manager as dependencies.
+
+# ---------------- App (Demo CRM) ----------------
+replicaCount: 2
+
+image:
+  repository: pwstaging/demo-crm
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+ingress:
+  enabled: true
+  # leave empty if your nginx IngressClass is already default; otherwise set "nginx"
+  className: ""
+  annotations: {}
+  hosts:
+    - host: democrmv3.ddns.net   # change if you use another hostname
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    enabled: false               # set to true only if cert-manager + ClusterIssuer exist
+    secretName: democrm-tls      # used when tls.enabled=true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# non-secret application configuration (exposed via ConfigMap)
+env:
+  LOG_LEVEL: "info"
+  PERSISTENCE: "true"
+
+# Optional pod-level knobs (templates use these only if present)
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ---------------- MongoDB via official Operator (mongodb/community-operator) ----------------
+# Enables the Helm dependency that installs the MongoDB Community Operator (and its CRDs).
+mongoOperator:
+  enabled: true
+
+# The actual MongoDB database you want (a MongoDBCommunity Custom Resource)
+mongodbCommunity:
+  name: demo-rs               # also used as the replica set name
+  members: 2
+  version: "6.0.14"
+  storageSize: 5Gi
+  appUser:
+    name: appuser
+    password: "CHANGE_ME_appPass"   # <-- change before deploy
+    db: appdb
+
+# Secret that holds the app's connection string (created by this chart)
+generatedDbUriSecret:
+  name: "democrm-db-uri"
+  key:  "MONGODB_URI"
+
+# ---------------- Optional dependencies (off by default) ----------------
+# If you turn these on, the subcharts will be installed by THIS chart (demo/learning use).
+# In production, you'd normally install them once per cluster, not per app.
+
+ingressNginx:
+  enabled: true
+  controller:
+    ingressClassResource:
+      default: true   # make "nginx" the default IngressClass (handy for demos)
+
+certManager:
+  enabled: true
+  installCRDs: true   # cert-manager CRDs should be installed the first time
+
+# Optional: create a ClusterIssuer from this chart (used with cert-manager)
+clusterIssuer:
+  enabled: false
+  name: letsencrypt-prod
+  email: moatazyehya123@gmail.com  # <-- change
+  server: https://acme-v02.api.letsencrypt.org/directory
+  solverIngressClass: nginx
+
+# If you enable TLS with cert-manager, also set:
+# ingress:
+#   annotations:
+#     cert-manager.io/cluster-issuer: letsencrypt-prod
+#   tls:
+#     enabled: true
+#     secretName: democrm-tls

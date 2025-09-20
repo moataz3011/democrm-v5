@@ -1,0 +1,12 @@
+dependencies:
+- name: community-operator
+  repository: https://mongodb.github.io/helm-charts
+  version: 0.9.0
+- name: ingress-nginx
+  repository: https://kubernetes.github.io/ingress-nginx
+  version: 4.11.2
+- name: cert-manager
+  repository: https://charts.jetstack.io
+  version: v1.14.5
+digest: sha256:225cdf4c3af721219fe9eed613142fedf4bae51c856f16ddc5edfeaedbaf9ef8
+generated: "2025-09-16T02:06:38.68434767+03:00"

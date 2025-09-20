@@ -1,0 +1,10 @@
+Demo CRM is deploying.
+
+Service: {{ include "democrm-v4.fullname" . }}:{{ .Values.service.port }}
+{{- if .Values.ingress.enabled }}
+Ingress host(s):
+{{- range .Values.ingress.hosts }}
+  - http{{ if $.Values.ingress.tls.enabled }}s{{ end }}://{{ .host }}/
+{{- end }}
+{{- end }}
+
