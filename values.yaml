@@ -2,7 +2,7 @@
 # This chart can also optionally install ingress-nginx and cert-manager as dependencies.
 
 # ---------------- App (Demo CRM) ----------------
-replicaCount: 2
+replicaCount: 3
 
 image:
   repository: pwstaging/demo-crm
